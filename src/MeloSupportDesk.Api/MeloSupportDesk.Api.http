@@ -1,0 +1,6 @@
+@MeloSupportDesk.Api_HostAddress = http://localhost:5159
+
+GET {{MeloSupportDesk.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
