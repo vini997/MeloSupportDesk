@@ -33,4 +33,7 @@ public class Ticket
     public DateTime? ResolvedAtUtc { get; set; }
 
     public DateTime? ClosedAtUtc { get; set; }
+
+    public ICollection<TicketComment> Comments { get; set; }
+        = new List<TicketComment>();
 }
