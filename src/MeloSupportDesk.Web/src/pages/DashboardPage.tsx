@@ -1,0 +1,137 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getAdminTickets } from '../api/tickets'
+import { useAuth } from '../auth/useAuth'
+import { RecentTickets } from '../components/RecentTickets'
+import type { Ticket } from '../types/ticket'
+
+interface TicketMetrics {
+  open: number
+  inProgress: number
+  resolved: number
+}
+
+export function DashboardPage() {
+  const navigate = useNavigate()
+  const { user, signOut } = useAuth()
+
+  const [metrics, setMetrics] = useState<TicketMetrics>({
+    open: 0,
+    inProgress: 0,
+    resolved: 0,
+  })
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let active = true
+
+    async function loadDashboard() {
+      try {
+        const [open, inProgress, resolved, recent] = await Promise.all([
+          getAdminTickets({ status: 'Open', pageSize: 1 }),
+          getAdminTickets({ status: 'InProgress', pageSize: 1 }),
+          getAdminTickets({ status: 'Resolved', pageSize: 1 }),
+          getAdminTickets({ page: 1, pageSize: 5 }),
+        ])
+
+        if (active) {
+          setMetrics({
+            open: open.totalCount,
+            inProgress: inProgress.totalCount,
+            resolved: resolved.totalCount,
+          })
+          setTickets(recent.items)
+        }
+      } catch {
+        if (active) {
+          setError('Unable to load ticket information.')
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadDashboard()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  function handleSignOut() {
+    signOut()
+    navigate('/login')
+  }
+
+  return (
+    <main className="dashboard-page">
+      <header className="dashboard-header">
+        <div className="dashboard-brand">
+          <div className="brand-mark brand-mark-small">M</div>
+
+          <div>
+            <strong>Melo Support Desk</strong>
+            <span>Support workspace</span>
+          </div>
+        </div>
+
+        <div className="user-menu">
+          <div>
+            <strong>{user?.fullName}</strong>
+            <span>{user?.role}</span>
+          </div>
+
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={handleSignOut}
+          >
+            Sign out
+          </button>
+        </div>
+      </header>
+
+      <section className="dashboard-content">
+        <div className="welcome-row">
+          <div>
+            <p className="eyebrow">Dashboard</p>
+            <h1>Welcome, {user?.fullName?.split(' ')[0]}.</h1>
+            <p>Here is an overview of your support workspace.</p>
+          </div>
+
+          <button type="button">Create ticket</button>
+        </div>
+
+        <div className="metric-grid">
+          <article className="metric-card">
+            <span>Open tickets</span>
+            <strong>{loading ? '—' : metrics.open}</strong>
+            <p>Waiting for attention</p>
+          </article>
+
+          <article className="metric-card">
+            <span>In progress</span>
+            <strong>{loading ? '—' : metrics.inProgress}</strong>
+            <p>Currently being handled</p>
+          </article>
+
+          <article className="metric-card">
+            <span>Resolved</span>
+            <strong>{loading ? '—' : metrics.resolved}</strong>
+            <p>Successfully completed</p>
+          </article>
+        </div>
+
+        <RecentTickets
+          tickets={tickets}
+          loading={loading}
+          error={error}
+        />
+      </section>
+    </main>
+  )
+}
