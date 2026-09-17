@@ -1,6 +1,7 @@
 import { api } from './client'
 import type {
   PaginatedTickets,
+  Ticket,
   TicketPriority,
   TicketStatus,
 } from '../types/ticket'
@@ -11,6 +12,13 @@ export interface TicketQuery {
   status?: TicketStatus
   priority?: TicketPriority
   search?: string
+}
+
+export interface CreateTicketInput {
+  title: string
+  description: string
+  category: string
+  priority: TicketPriority
 }
 
 export async function getAdminTickets(
@@ -28,3 +36,11 @@ export async function getAdminTickets(
 
   return response.data
 }
+
+export async function createTicket(
+  input: CreateTicketInput,
+): Promise<Ticket> {
+  const response = await api.post<Ticket>('/tickets', input)
+  return response.data
+}
+
