@@ -5,6 +5,7 @@ import { useAuth } from '../auth/useAuth'
 import { CreateTicketModal } from '../components/CreateTicketModal'
 import { RecentTickets } from '../components/RecentTickets'
 import type { Ticket } from '../types/ticket'
+import { TicketDetailsModal } from '../components/TicketDetailsModal'
 
 interface TicketMetrics {
   open: number
@@ -25,6 +26,8 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [createModalOpen, setCreateModalOpen] = useState(false)
+const [selectedTicket, setSelectedTicket] =
+  useState<Ticket | null>(null)
 
   useEffect(() => {
     let active = true
@@ -84,7 +87,59 @@ export function DashboardPage() {
 
     setCreateModalOpen(false)
   }
+function handleTicketUpdated(updatedTicket: Ticket) {
+  const previousStatus = selectedTicket?.status
 
+  setTickets((currentTickets) =>
+    currentTickets.map((currentTicket) =>
+      currentTicket.id === updatedTicket.id
+        ? updatedTicket
+        : currentTicket,
+    ),
+  )
+
+  setSelectedTicket(updatedTicket)
+
+  if (previousStatus === updatedTicket.status) {
+    return
+  }
+
+  setMetrics((currentMetrics) => {
+    const nextMetrics = { ...currentMetrics }
+
+    if (previousStatus === 'Open') {
+      nextMetrics.open = Math.max(0, nextMetrics.open - 1)
+    }
+
+    if (previousStatus === 'InProgress') {
+      nextMetrics.inProgress = Math.max(
+        0,
+        nextMetrics.inProgress - 1,
+      )
+    }
+
+    if (previousStatus === 'Resolved') {
+      nextMetrics.resolved = Math.max(
+        0,
+        nextMetrics.resolved - 1,
+      )
+    }
+
+    if (updatedTicket.status === 'Open') {
+      nextMetrics.open += 1
+    }
+
+    if (updatedTicket.status === 'InProgress') {
+      nextMetrics.inProgress += 1
+    }
+
+    if (updatedTicket.status === 'Resolved') {
+      nextMetrics.resolved += 1
+    }
+
+    return nextMetrics
+  })
+}
   return (
     <main className="dashboard-page">
       <header className="dashboard-header">
@@ -153,6 +208,7 @@ export function DashboardPage() {
           tickets={tickets}
           loading={loading}
           error={error}
+	  onSelectTicket={setSelectedTicket}
         />
       </section>
 
@@ -161,6 +217,13 @@ export function DashboardPage() {
         onClose={() => setCreateModalOpen(false)}
         onCreated={handleTicketCreated}
       />
+{selectedTicket && (
+  <TicketDetailsModal
+    ticket={selectedTicket}
+    onClose={() => setSelectedTicket(null)}
+    onUpdated={handleTicketUpdated}
+  />
+)}
     </main>
   )
 }

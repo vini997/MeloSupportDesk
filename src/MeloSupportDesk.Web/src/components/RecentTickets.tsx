@@ -4,6 +4,7 @@ interface RecentTicketsProps {
   tickets: Ticket[]
   loading: boolean
   error: string
+  onSelectTicket: (ticket: Ticket) => void
 }
 
 function formatStatus(status: Ticket['status']) {
@@ -14,6 +15,7 @@ export function RecentTickets({
   tickets,
   loading,
   error,
+  onSelectTicket,
 }: RecentTicketsProps) {
   return (
     <section className="tickets-panel">
@@ -49,7 +51,11 @@ export function RecentTickets({
 
             <tbody>
               {tickets.map((ticket) => (
-                <tr key={ticket.id}>
+                <tr
+		  key={ticket.id}
+ 		  className="ticket-row"
+		  onClick={() => onSelectTicket(ticket)}
+	        >
                   <td>{ticket.ticketNumber}</td>
                   <td>{ticket.title}</td>
                   <td>

@@ -25,6 +25,28 @@ public class UsersController : ControllerBase
         _database = database;
         _passwordHasher = passwordHasher;
     }
+[HttpGet("technicians")]
+public async Task<ActionResult<List<UserResponse>>> GetTechnicians()
+{
+    var technicians = await _database.Users
+        .AsNoTracking()
+        .Where(user =>
+            user.Role == UserRole.Technician &&
+            user.IsActive
+        )
+        .OrderBy(user => user.FullName)
+        .Select(user => new UserResponse(
+            user.Id,
+            user.FullName,
+            user.Email,
+            user.Role,
+            user.IsActive,
+            user.CreatedAtUtc
+        ))
+        .ToListAsync();
+
+    return Ok(technicians);
+}
     [HttpPost("staff")]
 public async Task<ActionResult<UserResponse>> CreateStaff(
     CreateStaffRequest request)

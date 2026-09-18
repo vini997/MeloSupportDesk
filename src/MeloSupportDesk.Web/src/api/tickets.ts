@@ -44,3 +44,26 @@ export async function createTicket(
   return response.data
 }
 
+export async function assignTicket(
+  ticketId: string,
+  technicianId: string,
+): Promise<Ticket> {
+  const response = await api.patch<Ticket>(
+    `/tickets/${ticketId}/assign`,
+    { technicianId },
+  )
+
+  return response.data
+}
+
+export async function updateTicketStatus(
+  ticketId: string,
+  status: TicketStatus,
+): Promise<Ticket> {
+  const response = await api.patch<Ticket>(
+    `/tickets/${ticketId}/status`,
+    { status },
+  )
+
+  return response.data
+}
