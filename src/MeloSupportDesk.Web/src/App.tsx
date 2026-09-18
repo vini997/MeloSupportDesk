@@ -2,7 +2,12 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/useAuth'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { TechnicianDashboardPage } from './pages/TechnicianDashboardPage'
 import './App.css'
+
+function getHomePath(role?: string) {
+  return role === 'Technician' ? '/technician' : '/dashboard'
+}
 
 function App() {
   const { user, isLoading } = useAuth()
@@ -16,19 +21,34 @@ function App() {
     )
   }
 
+  const homePath = getHomePath(user?.role)
+
   return (
     <Routes>
       <Route
         path="/login"
         element={
-          user ? <Navigate to="/dashboard" replace /> : <LoginPage />
+          user
+            ? <Navigate to={homePath} replace />
+            : <LoginPage />
         }
       />
 
       <Route
         path="/dashboard"
         element={
-          user ? <DashboardPage /> : <Navigate to="/login" replace />
+          user?.role === 'Admin'
+            ? <DashboardPage />
+            : <Navigate to={user ? homePath : '/login'} replace />
+        }
+      />
+
+      <Route
+        path="/technician"
+        element={
+          user?.role === 'Technician'
+            ? <TechnicianDashboardPage />
+            : <Navigate to={user ? homePath : '/login'} replace />
         }
       />
 
@@ -36,7 +56,7 @@ function App() {
         path="*"
         element={
           <Navigate
-            to={user ? '/dashboard' : '/login'}
+            to={user ? homePath : '/login'}
             replace
           />
         }

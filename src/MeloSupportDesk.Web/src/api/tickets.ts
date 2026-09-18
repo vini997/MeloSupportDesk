@@ -67,3 +67,7 @@ export async function updateTicketStatus(
 
   return response.data
 }
+export async function getAssignedTickets(): Promise<Ticket[]> {
+  const response = await api.get<Ticket[]>('/tickets/assigned')
+  return response.data
+}
