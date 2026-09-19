@@ -131,6 +131,28 @@ dotnet user-secrets set \
 
 Do not commit passwords, JWT keys, database credentials, or access tokens.
 
+## Demo Accounts
+
+In the Development environment, the API can automatically create administrator and technician demo accounts.
+
+Configure the demo password using .NET User Secrets:
+
+```bash
+dotnet user-secrets set \
+  "DemoUsers:Password" \
+  "DemoSupport2026!" \
+  --project src/MeloSupportDesk.Api
+
+Start the API after applying the database migrations. The following accounts will be created automatically if they do not already exist:
+
+| Role | Email | Password |
+|---|---|---|
+| Administrator | `admin@melosupportdesk.local` | `DemoSupport2026!` |
+| Technician | `technician@melosupportdesk.local` | `DemoSupport2026!` |
+
+Demo users are created only when the API runs in the Development environment. Production credentials must be managed separately and must never be committed to Git.
+
+
 ## Running the Project
 
 ### 1. Restore and build the backend

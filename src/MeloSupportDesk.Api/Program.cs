@@ -91,4 +91,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+if (app.Environment.IsDevelopment())
+{
+    var demoPassword = app.Configuration["DemoUsers:Password"];
+
+    if (!string.IsNullOrWhiteSpace(demoPassword))
+    {
+        await MeloSupportDesk.Api.Infrastructure.Persistence
+            .DevelopmentDataSeeder.SeedAsync(
+                app.Services,
+                demoPassword);
+    }
+}
+
 app.Run();
