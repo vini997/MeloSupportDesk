@@ -6,13 +6,40 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
+
+var databaseUrl = builder.Configuration["DATABASE_URL"];
+
+if (!string.IsNullOrWhiteSpace(databaseUrl))
+{
+    var databaseUri = new Uri(databaseUrl);
+    var userInfo = databaseUri.UserInfo.Split(':', 2);
+
+    var connectionBuilder = new NpgsqlConnectionStringBuilder
+    {
+        Host = databaseUri.Host,
+        Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
+        Username = Uri.UnescapeDataString(userInfo[0]),
+        Password = Uri.UnescapeDataString(userInfo[1]),
+        Database = "melosupportdesk",
+        SslMode = SslMode.Prefer
+    };
+
+    connectionString = connectionBuilder.ConnectionString;
+}
 
 builder.Services.AddDbContext<SupportDeskDbContext>(options =>
 {
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        connectionString
+        ?? throw new InvalidOperationException(
+            "Database connection is not configured."
+        )
     );
 });
 
