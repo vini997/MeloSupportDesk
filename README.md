@@ -4,6 +4,23 @@ A full-stack support ticket management system built with ASP.NET Core, React, Ty
 
 The application provides role-based workflows for administrators and technicians, including ticket creation, assignment, status management, dashboards, and workload monitoring.
 
+## Live Demo
+
+Try the deployed application:
+
+**Application:** https://melo-support-desk.vercel.app
+
+> The backend is hosted on a free Render instance. The first request may take up to 50 seconds while the service starts.
+
+### Demo Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| Administrator | `admin@melosupportdesk.local` | `DemoSupport2026!` |
+| Technician | `technician@melosupportdesk.local` | `DemoSupport2026!` |
+
+The demo illustrates the complete ticket workflow: ticket creation, technician assignment, status updates, workload monitoring, and resolution.
+
 ## Screenshots
 
 ### Login
